@@ -1,67 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <title>Dragon Hunt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 
 <body>
 
-    <h2>Dragon Hunt</h2>
+    <div class="container my-3">
 
-    <p id="prompt">Get ready...</p>
+      <h2>Dragon Hunt</h2>
 
-    <input id="answer" type="text" hidden="true"/>
+      <div id="prompt" class="d-block my-3">Welcome to your dragon-themed online scavenger hunt.</div>
 
-    <button id="button" onclick="clicked()">start</button>
+      <div class="d-block my-3">
+        <input id="answer" type="text" hidden/>
+        <select id="multi_ans" hidden></select>
+        <button id="button1" onclick="clicked()">start</button>
+      </div>
+      <div id="message" class="d-block my-3"/>
 
-    <p id="message"/>
+    </div>
 
     <script>
 
 const quizData = [
-  { question: "Question 1, what is <a href='https://en.wikipedia.org/wiki/Doughnut' target='_blank'>this page</a> for?",
-    correct: ["donut","donuts","doughnut","doughnuts"] },
-  { question: "Question 2", correct: ["answer2"] }
+  { question: "Please enter the first initial of each dragon queen in <a href='https://tuibooks.com/wings-of-fire/the-world/' target='_blank'>Phyrrhia</a> (without spaces). Hint: include all 3 Sand Wing queens.",
+    type: "text-alpha",
+    //correct: ["mcdbbbsg"] },
+    correct:   ["bbbcdgms"] },
+  { question: "Watch <a href='' target='_blank'>this video</a>; What ability did primates evolve to detect camoflaged snakes?",
+    type: "multi",
+    options: ["choose...", "spidey sense", "seeing color and in 3 dimensions", "keen sense of smell", "ability to feel nausea"],
+    correct: ["seeing color and in 3 dimensions"] },
+  { question: "Watch <a href='https://youtu.be/x-qsWTPul9Y?si=tJAMLwjCXxHPQb8L' target='_blank'>this video</a>; Legends of Dragons with jeweled costs may have been inspired by calcite crystals in fossils such as the ___?",
+    type: "text",
+    correct: ["sivatherium", "sivatherium fossil"] },
+  { question: "Watch <a href='https://youtu.be/Qo0kKk8loGQ?si=NBTRLzPornwebNZB' target='_blank'>this video</a>; A real name for a family of lizards is the ___ family.",
+    type: "text",
+    correct: ["draco"] },
+  { question: "According to <a href='' target='_blank'>this</a>, who is a giant serpentine creature who resided in Duat?",
+    type: "text",
+    correct: ["apep", "apophis", "apep or apophis", "apep/apophis"] },
+  { question: "According to <a href='https://share.google/Y7IP973tdPHVp6h0p' target='_blank'>this</a>, what is the name of the Chaldean dragon?",
+    type: "text",
+    correct: ["tiamat"] }
 ];
 
 let currentIndex = -1;
+let next_q_state = true;
+
+const message = document.getElementById("message");
+const p_prompt = document.getElementById("prompt");
+const ans = document.getElementById("answer");
+const multi_ans = document.getElementById("multi_ans");
+const b_button = document.getElementById("button1");
+
+b_button.focus();
+
+ans.addEventListener("keyup", function(event) {
+  if (event.key === "Enter") {
+    b_button.click();
+  }
+});
+
+function render_q() {
+  let message = document.getElementById("message");
+  let p_prompt = document.getElementById("prompt");
+  let ans = document.getElementById("answer");
+  let multi_ans = document.getElementById("multi_ans");
+  let q = quizData[currentIndex];
+  message.innerHTML = "";
+  ans.value = "";
+  p_prompt.innerHTML = (currentIndex + 1).toString() + ". " + q.question;
+  if (q.type == "multi") {
+    multi_ans.innerHTML = ""
+    q.options.forEach(item => {
+        const newOption = new Option(item, item);
+        multi_ans.appendChild(newOption);
+    });
+    ans.hidden = true;
+    multi_ans.hidden = false;
+    multi_ans.focus();
+  } else {
+    multi_ans.hidden = true;
+    ans.hidden = false;
+    ans.focus();
+  }
+}
 
 // This function runs when the button is clicked
 function clicked() {
-  let message = document.getElementById("message")
-  let p_prompt = document.getElementById("prompt")
-  let ans = document.getElementById("answer")
-  let button = document.getElementById("button")
-  if (currentIndex == -1) {
+  if (next_q_state) {
     currentIndex++;
-    let q = quizData[currentIndex];
-    p_prompt.innerHTML = q.question;
     //p_prompt.style.color = "blue";
-    ans.hidden = false;
+    b_button.innerHTML = "answer";
+    render_q();
+    next_q_state = false;
   } else if (currentIndex < quizData.length) {
     let q = quizData[currentIndex];
-    if (q.correct.includes(ans.value.toLowerCase())) {
-      message.innerText = "Yes!";
-      currentIndex++;
-      if (currentIndex == quizData.length) {
-        p_prompt.innerHTML = "All done.";
-        ans.hidden = true;
-        button.hidden = true;
+    let ans_txt = q.type == "multi" ? multi_ans.value : ans.value.trim().toLowerCase();
+    if (q.type.includes("-alpha")) {
+      ans_txt = ans_txt.split('').sort().join(''); 
+    }
+    if (q.correct.includes(ans_txt)) {
+      if (currentIndex == quizData.length - 1) {
+        message.innerText = "Quiz complete. You are a dragon fanatic, well done!";
+        b_button.hidden = true;
         return;
       }
-      q = quizData[currentIndex];
-      p_prompt.innerText = q.question;
-      ans.value = "";
+      message.innerText = "Yes!";
+      next_q_state = true;
+      b_button.innerHTML = "next question";
+      b_button.focus();
     } else {
       message.innerText = "Nope";
+      if (q.type == "multi") {
+        multi_ans.focus();
+      } else {
+        ans.focus();
+      }
     }
   }
 }
 
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
 </body>
 </html>
 
