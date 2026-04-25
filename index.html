@@ -1,6 +1,67 @@
-<html>
-  <body>
-  <h1>Welcome</h1>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dragon Hunt</title>
+</head>
+
+<body>
+
+    <h2>Dragon Hunt</h2>
+
+    <p id="prompt">Get ready...</p>
+
+    <input id="answer" type="text" hidden="true"/>
+
+    <button id="button" onclick="clicked()">start</button>
+
+    <p id="message"/>
+
+    <script>
+
+const quizData = [
+  { question: "Question 1, what is <a href='https://en.wikipedia.org/wiki/Doughnut' target='_blank'>this page</a> for?",
+    correct: ["donut","donuts","doughnut","doughnuts"] },
+  { question: "Question 2", correct: ["answer2"] }
+];
+
+let currentIndex = -1;
+
+// This function runs when the button is clicked
+function clicked() {
+  let message = document.getElementById("message")
+  let p_prompt = document.getElementById("prompt")
+  let ans = document.getElementById("answer")
+  let button = document.getElementById("button")
+  if (currentIndex == -1) {
+    currentIndex++;
+    let q = quizData[currentIndex];
+    p_prompt.innerHTML = q.question;
+    //p_prompt.style.color = "blue";
+    ans.hidden = false;
+  } else if (currentIndex < quizData.length) {
+    let q = quizData[currentIndex];
+    if (q.correct.includes(ans.value.toLowerCase())) {
+      message.innerText = "Yes!";
+      currentIndex++;
+      if (currentIndex == quizData.length) {
+        p_prompt.innerHTML = "All done.";
+        ans.hidden = true;
+        button.hidden = true;
+        return;
+      }
+      q = quizData[currentIndex];
+      p_prompt.innerText = q.question;
+      ans.value = "";
+    } else {
+      message.innerText = "Nope";
+    }
+  }
+}
+
+    </script>
+
+</body>
 </html>
 
