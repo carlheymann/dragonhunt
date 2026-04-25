@@ -61,9 +61,28 @@ const b_button = document.getElementById("button1");
 
 b_button.focus();
 
+function pressed_enter() {
+    if (currentIndex < 0 || currentIndex >= quizData.length) {
+      return;
+    }
+    let q = quizData[currentIndex];
+    let ans_txt = q.type == "multi" ? multi_ans.value : ans.value.trim().toLowerCase();
+    if (q.type == "multi" && ans_txt == "choose...") {
+      ans_txt = "";
+    }
+    if (ans_txt != "") {
+      b_button.click();
+    }
+}
+
 ans.addEventListener("keyup", function(event) {
   if (event.key === "Enter") {
-    b_button.click();
+    pressed_enter();
+  }
+});
+multi_ans.addEventListener("keyup", function(event) {
+  if (event.key === "Enter") {
+    pressed_enter();
   }
 });
 
@@ -108,16 +127,16 @@ function clicked() {
     }
     if (q.correct.includes(ans_txt)) {
       if (currentIndex == quizData.length - 1) {
-        message.innerText = "Quiz complete. You are a dragon fanatic, well done!";
+        message.innerHTML = "Quiz complete. You are a dragon fanatic, well done!";
         b_button.hidden = true;
         return;
       }
-      message.innerText = "Yes!";
+      message.innerHTML = "Yes!";
       next_q_state = true;
       b_button.innerHTML = "next question";
       b_button.focus();
     } else {
-      message.innerText = "Nope";
+      message.innerHTML = "Nope";
       if (q.type == "multi") {
         multi_ans.focus();
       } else {
